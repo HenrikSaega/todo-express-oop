@@ -1,19 +1,30 @@
 import {Todo} from "../models/todo.js"
+import { fileManager } from "../files.js" 
 
 class todoController{
     constructor() {
         this.TODOS = []
     }
 
-    createTodo(req, res){
+    async createTodo(req, res){
         const task = req.body.task
         const newTodo = new Todo(Math.random().toString(), task)
         this.TODOS.push(newTodo)
-
+        await fileManager.writeFile("./data/todos.json", this.TODOS)
+        
         res.json({
             message: "Created new todo object",
             newTask: newTodo,
         })
+    }
+
+    async initTodos(){
+        const todosData = await fileManager.readFile("./data/todos.json")
+        if(todosData !== null){
+            this.TODOS = todosData
+        } else {
+            this.TODOS = []
+        }
     }
 
     getTodos(req, res){
