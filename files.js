@@ -10,7 +10,7 @@ class FileManager{
         }
     }
 
-    async readFiles(filename){
+    async readFile(filename){
         try {
             const fileContent = await fs.readFile(filename, "utf-8")
             const fileData = JSON.parse(fileContent)

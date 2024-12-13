@@ -3,7 +3,16 @@ import { fileManager } from "../files.js"
 
 class todoController{
     constructor() {
-        this.TODOS = []
+        this.initTodos()
+    }
+    async initTodos(){
+        const todosData = await fileManager.readFile("./data/todos.json")
+        console.log("Read Todos Data: ", todosData);
+        if(todosData !== null){
+            this.TODOS = todosData
+        } else {
+            this.TODOS = []
+        }
     }
 
     async createTodo(req, res){
@@ -18,20 +27,12 @@ class todoController{
         })
     }
 
-    async initTodos(){
-        const todosData = await fileManager.readFile("./data/todos.json")
-        if(todosData !== null){
-            this.TODOS = todosData
-        } else {
-            this.TODOS = []
-        }
-    }
-
     getTodos(req, res){
+        console.log("Sending Todos: ", this.TODOS);
         res.json({tasks: this.TODOS})
     }
 
-    updateTodo(req, res){
+    async updateTodo(req, res){
         const todoId = req.params.id
         const updatedTask = req.body.task
         const todoIndex = this.TODOS.findIndex((todo) => todo.id === todoId)
@@ -42,13 +43,14 @@ class todoController{
             })
         }else{
         this.TODOS[todoIndex] = new Todo(this.TODOS[todoIndex].id, updatedTask)
+        await fileManager.writeFile("./data/todos.json", this.TODOS)
         res.json({
             message: "Updated todo!",
             updateTask: this.TODOS[todoIndex]
         })}
     }
 
-    deleteTodo(req, res){
+    async deleteTodo(req, res){
         const todoId = req.params.id
         let deletedTaskId = this.TODOS.findIndex((todo) => todo.id === todoId)
         if(deletedTaskId < 0){
@@ -63,6 +65,7 @@ class todoController{
             deleted_task: this.TODOS[deletedTaskId]
         })
         this.TODOS.splice(deletedTaskId, 1)
+        await fileManager.writeFile("./data/todos.json", this.TODOS)
         }
     }
 }
